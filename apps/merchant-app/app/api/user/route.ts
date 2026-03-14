@@ -4,8 +4,8 @@ import { prisma as client } from "@repo/db/client";
 export const GET = async () => {
     await client.user.create({
         data: {
-            username: "asd",
-            password: "adsads"
+            number: "1111111111",
+            password: "password123"
         }
     })
     return NextResponse.json({

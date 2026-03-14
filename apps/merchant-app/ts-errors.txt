@@ -1,0 +1,22 @@
+﻿app/api/auth/[...nextauth]/route.ts(4,26): error TS2345: Argument of type '{ providers: OAuthConfig<GoogleProfile>[]; callbacks: { signIn({ user, account }: { user: { email: string; name: string; }; account: { provider: "google" | "github"; }; }): Promise<...>; }; secret: string; }' is not assignable to parameter of type 'AuthOptions'.
+  The types of 'callbacks.signIn' are incompatible between these types.
+    Type '({ user, account }: { user: { email: string; name: string; }; account: { provider: "google" | "github"; }; }) => Promise<boolean>' is not assignable to type '(params: { user: User | AdapterUser; account: Account | null; profile?: Profile | undefined; email?: { verificationRequest?: boolean | undefined; } | undefined; credentials?: Record<...> | undefined; }) => Awaitable<...>'.
+      Types of parameters '__0' and 'params' are incompatible.
+        Type '{ user: User | AdapterUser; account: Account | null; profile?: Profile | undefined; email?: { verificationRequest?: boolean | undefined; } | undefined; credentials?: Record<...> | undefined; }' is not assignable to type '{ user: { email: string; name: string; }; account: { provider: "google" | "github"; }; }'.
+          Types of property 'user' are incompatible.
+            Type 'User | AdapterUser' is not assignable to type '{ email: string; name: string; }'.
+              Type 'User' is not assignable to type '{ email: string; name: string; }'.
+                Types of property 'email' are incompatible.
+                  Type 'string | null | undefined' is not assignable to type 'string'.
+                    Type 'undefined' is not assignable to type 'string'.
+app/api/user/route.ts(7,13): error TS2353: Object literal may only specify known properties, and 'username' does not exist in type '(Without<UserCreateInput, UserUncheckedCreateInput> & UserUncheckedCreateInput) | (Without<...> & UserCreateInput)'.
+lib/auth.ts(36,13): error TS2353: Object literal may only specify known properties, and 'password' does not exist in type '(Without<MerchantCreateInput, MerchantUncheckedCreateInput> & MerchantUncheckedCreateInput) | (Without<...> & MerchantCreateInput)'.
+../../packages/db/index.ts(13,32): error TS2345: Argument of type 'Pool' is not assignable to parameter of type 'Pool | PoolConfig'.
+  Type 'import("C:/Users/rahul/Code/paytm/node_modules/@types/pg/index").Pool' is not assignable to type 'import("C:/Users/rahul/Code/paytm/node_modules/@prisma/adapter-pg/node_modules/@types/pg/index").Pool'.
+    The types of 'options.Client' are incompatible between these types.
+      Type '(new () => import("C:/Users/rahul/Code/paytm/node_modules/@types/pg/index").ClientBase) | undefined' is not assignable to type '(new () => import("C:/Users/rahul/Code/paytm/node_modules/@prisma/adapter-pg/node_modules/@types/pg/index").ClientBase) | undefined'.
+        Type 'new () => import("C:/Users/rahul/Code/paytm/node_modules/@types/pg/index").ClientBase' is not assignable to type 'new () => import("C:/Users/rahul/Code/paytm/node_modules/@prisma/adapter-pg/node_modules/@types/pg/index").ClientBase'.
+          Construct signature return types 'ClientBase' and 'ClientBase' are incompatible.
+            The types returned by 'connect()' are incompatible between these types.
+              Type 'Promise<ClientBase>' is not assignable to type 'Promise<void>'.
+                Type 'ClientBase' is not assignable to type 'void'.

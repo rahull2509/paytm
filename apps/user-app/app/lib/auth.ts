@@ -16,7 +16,7 @@ export const authOptions = {
             const hashedPassword = await bcrypt.hash(credentials.password, 10);
             const existingUser = await db.user.findFirst({
                 where: {
-                    username: credentials.phone
+                    number: credentials.phone
                 }
             });
 
@@ -25,8 +25,8 @@ export const authOptions = {
                 if (passwordValidation) {
                     return {
                         id: existingUser.id.toString(),
-                        name: existingUser.username,
-                        email: existingUser.username
+                        name: existingUser.name,
+                        email: existingUser.number
                     }
                 }
                 return null;
@@ -35,15 +35,15 @@ export const authOptions = {
             try {
                 const user = await db.user.create({
                     data: {
-                        username: credentials.phone,
+                        number: credentials.phone,
                         password: hashedPassword
                     }
                 });
-            
+
                 return {
                     id: user.id.toString(),
-                    name: user.username,
-                    email: user.username
+                    name: user.name,
+                    email: user.number
                 }
             } catch(e) {
                 console.error(e);
@@ -55,11 +55,11 @@ export const authOptions = {
     ],
     secret: process.env.JWT_SECRET || "secret",
     callbacks: {
-        // TODO: can u fix the type here? Using any is bad
         async session({ token, session }: any) {
-            session.user.id = token.sub
-
-            return session
+            if (session && session.user && token && token.sub) {
+                session.user.id = token.sub;
+            }
+            return session;
         }
     }
   }
