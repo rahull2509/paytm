@@ -22,22 +22,61 @@ export async function p2pTransfer(to: string, amount: number) {
             message: "User not found"
         }
     }
-    await prisma.$transaction(async (tx) => {
-        const fromBalance = await tx.balance.findUnique({
-            where: { userId: Number(from) },
-          });
-          if (!fromBalance || fromBalance.amount < amount) {
-            throw new Error('Insufficient funds');
-          }
+    try {
+        await prisma.$transaction(async (tx) => {
+            // Lock the row to prevent concurrent updates affecting the balance
+            await tx.$queryRaw`SELECT * FROM "Balance" WHERE "userId" = ${Number(from)} FOR UPDATE`;
 
-          await tx.balance.update({
-            where: { userId: Number(from) },
-            data: { amount: { decrement: amount } },
-          });
+            const fromBalance = await tx.balance.findUnique({
+                where: { userId: Number(from) },
+              });
+              if (!fromBalance || fromBalance.amount < amount) {
+                throw new Error('Insufficient funds');
+              }
 
-          await tx.balance.update({
-            where: { userId: toUser.id },
-            data: { amount: { increment: amount } },
-          });
-    });
+              await tx.balance.update({
+                where: { userId: Number(from) },
+                data: { amount: { decrement: amount } },
+              });
+
+              // The recipient might not have a balance record yet. Add a check to explicitly handle that.
+              const toBalance = await tx.balance.findUnique({
+                  where: { userId: toUser.id }
+              });
+
+              if (!toBalance) {
+                  await tx.balance.create({
+                      data: {
+                          userId: toUser.id,
+                          amount: amount,
+                          locked: 0
+                      }
+                  });
+              } else {
+                  await tx.balance.update({
+                    where: { userId: toUser.id },
+                    data: { amount: { increment: amount } },
+                  });
+              }
+
+              await tx.p2pTransfer.create({
+                  data: {
+                      fromUserId: Number(from),
+                      toUserId: toUser.id,
+                      amount,
+                      timestamp: new Date()
+                  }
+              });
+        });
+
+        return {
+            success: true,
+            message: "Transfer successful"
+        }
+    } catch (e: any) {
+        return {
+            success: false,
+            message: e.message || "Transfer failed"
+        }
+    }
 }

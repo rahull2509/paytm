@@ -12,6 +12,13 @@ export async function createOnRampTransaction(provider: string, amount: number) 
             message: "Unauthenticated request"
         }
     }
+    // Prevent amounts from exceeding Postgres integer bounds (max 2.14 billion)
+    if (amount <= 0 || amount > 10000000) {
+        return {
+            message: "Invalid amount: must be between 1 and 10,000,000"
+        }
+    }
+
     const token = (Math.random() * 1000).toString();
     await prisma.onRampTransaction.create({
         data: {

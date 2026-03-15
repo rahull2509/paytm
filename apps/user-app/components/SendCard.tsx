@@ -10,6 +10,8 @@ export function SendCard() {
     const [number, setNumber] = useState("");
     const [amount, setAmount] = useState("");
 
+    const [message, setMessage] = useState("");
+
     return <div className="h-[90vh]">
         <Center>
             <Card title="Send">
@@ -22,9 +24,12 @@ export function SendCard() {
                     }} />
                     <div className="pt-4 flex justify-center">
                         <Button onClick={async () => {
-                            await p2pTransfer(number, Number(amount) * 100)
+                            setMessage("");
+                            const res = await p2pTransfer(number, Number(amount) * 100);
+                            setMessage(res.message);
                         }}>Send</Button>
                     </div>
+                    {message && <div className="pt-4 text-center text-sm font-semibold">{message}</div>}
                 </div>
             </Card>
         </Center>
