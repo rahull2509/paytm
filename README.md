@@ -1,159 +1,92 @@
-# Turborepo starter
+# Paytm Clone - End-to-End Modern Payment App
 
-This Turborepo starter is maintained by the Turborepo core team.
+This is a comprehensive, production-ready payment application built inside a **Turborepo** monorepo. It features a User Wallet, P2P Money Transfers, a Merchant Dashboard, and a Bank Webhook system for simulating secure money deposits.
 
-## Using this example
+## 🚀 Features
 
-Run the following command:
+*   **P2P Transfers**: Send money to other users securely using their phone number.
+*   **Wallet Balance**: View current balance and locked funds (during active transactions).
+*   **On-Ramp Transactions**: Simulate adding money from a bank account into the internal wallet.
+*   **Secure Authentication**: NextAuth.js for secure user sessions and Merchant logins (OAuth support).
+*   **Monorepo Architecture**: Managed with Turborepo, isolating apps and shared configuration (UI, ESLint, TypeScript, Database).
+*   **Robust Database**: PostgreSQL setup managed completely by Prisma ORM.
 
-```sh
-npx create-turbo@latest
-```
+## 🛠️ Tech Stack
 
-## What's inside?
+*   **Framework:** Next.js (App Router), Express.js (Webhooks)
+*   **Language:** TypeScript
+*   **Monorepo:** Turborepo, npm Workspaces
+*   **Database:** PostgreSQL, Prisma ORM
+*   **Styling:** Tailwind CSS (within Next.js apps)
+*   **Authentication:** NextAuth.js
+*   **Containerization:** Docker
 
-This Turborepo includes the following packages/apps:
+## 📁 Repository Structure
 
-### Apps and Packages
+### Apps (`apps/`)
+*   `user-app`: Main Next.js application for users (Dashboard, P2P Transfers, Add Money, Transactions).
+*   `merchant-app`: Next.js application for merchant access.
+*   `bank-webhook`: Express server simulating real bank APIs that confirm success/failure of On-Ramp money deposits into the wallet.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Shared Packages (`packages/`)
+*   `db`: Prisma schema, database migrations, and generated Prisma Client.
+*   `ui`: Shared React components (`Appbar`, `Button`, `TextInput`, `Card`, etc.).
+*   `store`: Centralized State Management/Stores.
+*   `eslint-config` & `typescript-config`: Shared static analysis constraints across all TS/JS code.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## ⚙️ Getting Started
 
-### Utilities
+### Prerequisites
+*   Node.js (>= 18)
+*   Docker & Docker Compose (or a local PostgreSQL instance)
 
-This Turborepo has some additional tools already setup for you:
+### Installation
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repository-url>
+   cd paytm
+   ```
 
-### Build
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-To build all apps and packages, run the following command:
+3. **Database Setup (PostgreSQL):**
+   Start the Postgres database using Docker:
+   ```bash
+   docker-compose up -d
+   ```
+   
+   *You'll need a `.env` file with `DATABASE_URL` configured internally pointing to the Postgres instance.*
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+4. **Initialize Prisma:**
+   Run the following commands to create the tables and generate the Prisma client:
+   ```bash
+   cd packages/db
+   npx prisma migrate dev
+   npx prisma generate
+   ```
 
-```sh
-cd my-turborepo
-turbo build
-```
+5. **Run the Development Server:**
+   Go back to the root folder:
+   ```bash
+   cd ../../
+   npm run dev
+   ```
+   *This single command will spin up the `user-app`, `merchant-app`, and `bank-webhook` simultaneously.*
 
-Without global `turbo`, use your package manager:
+## 🏦 How Money Gets Added (On-Ramp Flow)
+1. The user initiates an "Add Money" request from the `user-app`.
+2. A unique dummy token is generated and recorded in the database as `Processing` (OnRampTransaction).
+3. The mock `bank-webhook` receives this token alongside the user ID and amount.
+4. The webhook verifies, updates the transaction status to `Success`, and atomically credits the user's `Balance` using Prisma transactions.
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+## 📜 Scripts
+- `npm run dev`: Starts all applications in development mode.
+- `npm run build`: Builds all apps via Turborepo.
+- `npm run lint`: Lints the entire monorepo.
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+---
+*Built utilizing Next.js & Turborepo.*
